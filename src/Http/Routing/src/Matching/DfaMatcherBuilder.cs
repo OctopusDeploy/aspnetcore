@@ -264,10 +264,17 @@ namespace Microsoft.AspNetCore.Routing.Matching
                                 };
                             }
 
-                            // A parameter should traverse all literal nodes as well as the parameter node
+                            // A parameter should traverse all literal nodes as well as the parameter node if all constraints are satisfied
                             if (parent.Literals != null)
                             {
-                                nextParents.AddRange(parent.Literals.Values);
+                                if (endpoint.RoutePattern.ParameterPolicies.TryGetValue(parameterPart.Name, out var parameterPolicyReferences))
+                                {
+                                    AddParentsWithMatchingLiteralConstraints(nextParents, parent, parameterPart, parameterPolicyReferences);
+                                }
+                                else
+                                {
+                                    nextParents.AddRange(parent.Literals.Values);
+                                }
                             }
                             nextParents.Add(parent.Parameters);
                         }
@@ -311,6 +318,51 @@ namespace Microsoft.AspNetCore.Routing.Matching
             root.Visit(ApplyPolicies);
 
             return root;
+        }
+
+        private void AddParentsWithMatchingLiteralConstraints(List<DfaNode> nextParents, DfaNode parent,
+            RoutePatternParameterPart parameterPart, IReadOnlyList<RoutePatternParameterPolicyReference> parameterPolicyReferences)
+        {
+            var hasFailingPolicy = parent.Literals.Keys.Count < 32
+                ? stackalloc bool[32].Slice(parent.Literals.Keys.Count)
+                : new bool[parent.Literals.Keys.Count];
+
+            for (var i = 0; i < parameterPolicyReferences.Count; i++)
+            {
+                var reference = parameterPolicyReferences[i];
+                var parameterPolicy = _parameterPolicyFactory.Create(parameterPart, reference);
+                if (parameterPolicy is ILiteralConstraint constraint)
+                {
+                    var literalIndex = 0;
+                    var allFailed = true;
+                    foreach (var literal in parent.Literals.Keys)
+                    {
+                        if (!hasFailingPolicy[literalIndex] && !constraint.MatchLiteral(parameterPart.Name, literal))
+                        {
+                            hasFailingPolicy[literalIndex] = true;
+                        }
+
+                        allFailed &= hasFailingPolicy[literalIndex];
+                        literalIndex++;
+                    }
+
+                    if (allFailed)
+                    {
+                        // Exit early if all literals failed to match at least one constraint
+                        return;
+                    }
+                }
+            }
+
+            var k = 0;
+            foreach (var literal in parent.Literals.Values)
+            {
+                if (!hasFailingPolicy[k])
+                {
+                    nextParents.Add(literal);
+                }
+                k++;
+            }
         }
 
         private static void AddLiteralNode(bool includeLabel, List<DfaNode> nextParents, DfaNode parent, string literal)
