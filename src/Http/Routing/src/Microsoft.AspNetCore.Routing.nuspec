@@ -1,15 +1,17 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>$id$</id>
-    <version>$version$</version>
-    <title>$title$</title>
+    <id>Microsoft.AspNetCore.Routing</id>
+    <version>5.0.7-memory-fix</version>
     <authors>Microsoft</authors>
     <owners>Octopus Deploy Ptd. Ltd.</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>$description$</description>
+    <description>ASP.NET Core middleware for routing requests to application logic and for generating links.</description>
     <releaseNotes>Fix for memory consumption issue.</releaseNotes>
     <copyright>Copyright 2021</copyright>
     <tags>aspnetcore routing</tags>
   </metadata>
+  <files>
+    <file src="../../../../artifacts/bin/Microsoft.AspNetCore.Routing/Release/net5.0/Microsoft.AspNetCore.Routing.dll" target="lib/net5.0" />
+  </files>
 </package>
