@@ -324,7 +324,7 @@ namespace Microsoft.AspNetCore.Routing.Matching
             RoutePatternParameterPart parameterPart, IReadOnlyList<RoutePatternParameterPolicyReference> parameterPolicyReferences)
         {
             var hasFailingPolicy = parent.Literals.Keys.Count < 32
-                ? stackalloc bool[32].Slice(parent.Literals.Keys.Count)
+                ? stackalloc bool[32].Slice(0, parent.Literals.Keys.Count)
                 : new bool[parent.Literals.Keys.Count];
 
             for (var i = 0; i < parameterPolicyReferences.Count; i++)
