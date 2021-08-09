@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Microsoft.AspNetCore.Routing</id>
-    <version>5.0.7-memory-fix</version>
+    <version>5.0.7-memory-fix2</version>
     <authors>Microsoft</authors>
     <owners>Octopus Deploy Ptd. Ltd.</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
